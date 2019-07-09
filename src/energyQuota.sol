@@ -4,7 +4,7 @@ contract EnergyQuota{
     //uint percentageBought = 0;
     
     struct Quota{
-        uint percentageBought;
+        uint valueBougth;
     }
     
     mapping (address => Quota) clients;
@@ -13,15 +13,15 @@ contract EnergyQuota{
       //  clients[msg.sender].percentageBought = _percentageBought;
     //}
     
-    function setPercentageBought(uint _percentageBought, address _client) public{
+    function setValueBought(uint _valueBougth, address _client) public{
         //TODO: Quem pode setar esse dado? Seria necessario um owner? deveria apenas o msg.sender poder setar o seu percentageBought?
         //clients[msg.sender].percentageBought = _percentageBought;
-        clients[_client].percentageBought = _percentageBought;
+        clients[_client].valueBougth = _valueBougth;
     }
     
-    function getPercentageBought(address _client) public view returns (uint _percentageBought){
+    function getValueBought(address _client) public view returns (uint _percentageBought){
         //TODO: Verificacao de quem pode pegar esse dado?
-        return clients[_client].percentageBought;
+        return clients[_client].valueBougth;
     }
     
 }

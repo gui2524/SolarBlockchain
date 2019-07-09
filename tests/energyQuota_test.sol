@@ -14,7 +14,7 @@ contract test_1 {
   function check1() public {
     uint percentageQuota = 10;
     address myAddress = 0xE0f5206BBD039e7b0592d8918820024e2a7437b9;
-    quotaToTest.setPercentageBought(percentageQuota, myAddress);
-    Assert.equal(percentageQuota, quotaToTest.getPercentageBought(myAddress), "Percentage Bougth different ");
+    quotaToTest.setValueBought(percentageQuota, myAddress);
+    Assert.equal(percentageQuota, quotaToTest.getValueBought(myAddress), "Percentage Bougth different ");
   }
 }
