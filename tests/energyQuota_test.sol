@@ -6,15 +6,29 @@ import "./solarInfo.sol";
 contract test_1 {
 
   EnergyQuota quotaToTest;
+  EnergyConsumption consumptionToTest;
   
   function beforeAll() public {
     quotaToTest = new EnergyQuota();
+    consumptionToTest = new EnergyConsumption(address(quotaToTest));
   }
  
   function check1() public {
     uint percentageQuota = 10;
-    address myAddress = 0xE0f5206BBD039e7b0592d8918820024e2a7437b9;
-    quotaToTest.setValueBought(percentageQuota, myAddress);
-    Assert.equal(percentageQuota, quotaToTest.getValueBought(myAddress), "Percentage Bougth different ");
+    quotaToTest.setValueBought(percentageQuota, msg.sender);
+    Assert.equal(percentageQuota, quotaToTest.getValueBought(msg.sender), "Percentage Bougth different ");
+  }
+  
+  function check2() public{
+    quotaToTest.setValueBought(10, msg.sender);
+    consumptionToTest.setEnergyConsumed(5, msg.sender);
+    Assert.equal(5, consumptionToTest.checkEnergyCredit(msg.sender), "Check energy different ");
+    consumptionToTest.setEnergyConsumed(10, msg.sender);
+    Assert.equal(0, consumptionToTest.checkEnergyCredit(msg.sender), "Check energy different ");
+    consumptionToTest.setEnergyConsumed(15, msg.sender);
+    Assert.equal(-5, consumptionToTest.checkEnergyCredit(msg.sender), "Check energy different ");
   }
 }
+
+
+
