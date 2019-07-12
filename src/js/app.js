@@ -56,7 +56,6 @@ App = {
  
     // Load account data
     web3.eth.getAccounts(function(error, accounts) {
-        console.log(accounts);
         App.account = accounts[0];
         $("#accountAddress").html("Your Account: " + App.account);
     });
@@ -65,44 +64,49 @@ App = {
       energyConsumptionInstance = instance;
       ID = window.prompt("Enter your LIGHT account ID: ");
       amount = window.prompt("Enter your amount of energy quota bought: ");
+      ID = String(ID);
+      var value;
       if(ID == "Guilherme"){
-        energyConsumptionInstance.addClient(100, App.account)
+        value = 100;
       }else if(ID == "Tamires"){
-        energyConsumptionInstance.addClient(50, App.account)
+        value = 50;
       }else{
-        energyConsumptionInstance.addClient(20, App.account)
+        value = Math.random() * 100;
+        
       }
       
-      return energyConsumptionInstance.getEnergyConsumed(App.account);
+      return energyConsumptionInstance.addClient(value, ID)
+      }).then(function() {
+      return energyConsumptionInstance.getEnergyConsumed(ID);
     }).then(function(_energyConsumed) {
       energyConsumed = _energyConsumed;
 
       App.contracts.EnergyQuota.deployed().then(function(instance) {
       energyQuotaInstance = instance;
       
-      energyQuotaInstance.addClient(parseInt(amount), App.account);
-      
-      return energyQuotaInstance.getQuotaBought(App.account);
+      return energyQuotaInstance.addClient(parseInt(amount), ID);
+      }).then(function() {
+      return energyQuotaInstance.getQuotaBought(ID);
       }).then(function(_quota) {
         quota = _quota;
-        energyConsumptionInstance.manageConsumption(App.account, energyQuotaInstance.address);
-        return energyConsumptionInstance.getEnergyCredit(App.account);
-          }).then(function(_energyCredit) {
-            energyCredit =  _energyCredit
-            return energyConsumptionInstance.getEnergyToBePaid(App.account);
-          }).then(function(_energyToBePaid) {
-              totalToBePaid = _energyToBePaid
+        return energyConsumptionInstance.manageConsumption(ID, energyQuotaInstance.address);
+        }).then(function() {
+          return energyConsumptionInstance.getEnergyCredit(ID);
+            }).then(function(_energyCredit) {
+              energyCredit =  _energyCredit
+              return energyConsumptionInstance.getEnergyToBePaid(ID);
+            }).then(function(_energyToBePaid) {
+                totalToBePaid = _energyToBePaid
 
-              console.log(energyCredit);
-              var candidatesResults = $("#candidatesResults");
-              candidatesResults.empty();
+                var candidatesResults = $("#candidatesResults");
+                candidatesResults.empty();
 
-            // Render candidate Result
-              var candidateTemplate = "<tr><th>" + ID + "</th><td>" + totalToBePaid + "</td><td>" + energyCredit + "</td><td>" + energyConsumed + "</td><td>" + quota + "</td></tr>"
-              candidatesResults.append(candidateTemplate);
+              // Render candidate Result
+                var candidateTemplate = "<tr><th>" + ID + "</th><td>" + totalToBePaid + "</td><td>" + energyCredit + "</td><td>" + energyConsumed + "</td><td>" + quota + "</td></tr>"
+                candidatesResults.append(candidateTemplate);
 
-              loader.hide();
-              content.show();
+                loader.hide();
+                content.show();
 
       }).catch(function(error) {
         console.warn(error);

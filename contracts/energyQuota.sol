@@ -6,13 +6,13 @@ contract EnergyQuota{
         int quotaBought;
     }
     
-    mapping (address => Quota) clients;
+    mapping (string => Quota) clients;
     
-    function addClient(int _quotaBought, address _client) public{
+    function addClient(int _quotaBought, string memory _client) public{
         clients[_client].quotaBought = _quotaBought;
     }
     
-    function getQuotaBought(address _client) public view returns (int _quotaBought){
+    function getQuotaBought(string memory _client) public view returns (int _quotaBought){
         return clients[_client].quotaBought;
     }
 }
@@ -26,16 +26,16 @@ contract EnergyConsumption{
         int energyToBePaid;
     }
     
-    mapping (address => Client) clients;
+    mapping (string => Client) clients;
     
      
-    function addClient(int _energyConsumed, address _client) public{
+    function addClient(int _energyConsumed, string memory _client) public{
         clients[_client].energyConsumed = _energyConsumed;
         clients[_client].energyToBePaid = 0;
         clients[_client].energyCredit = 0;
     }
     
-    function manageConsumption(address _client, address _contract) public{
+    function manageConsumption(string memory _client, address _contract) public{
         int credit = EnergyQuota(_contract).getQuotaBought(_client) - clients[_client].energyConsumed;
         int toBePaid = clients[_client].energyConsumed- EnergyQuota(_contract).getQuotaBought(_client);
        
@@ -43,15 +43,15 @@ contract EnergyConsumption{
         clients[_client].energyToBePaid = (toBePaid > 0) ? toBePaid : 0;
     }
     
-    function getEnergyConsumed(address _client) public view returns (int _energyConsumed){
+    function getEnergyConsumed(string memory _client) public view returns (int _energyConsumed){
         return clients[_client].energyConsumed;
     }
     
-    function getEnergyCredit(address _client) public view returns (int _energyCredit){
+    function getEnergyCredit(string memory _client) public view returns (int _energyCredit){
         return clients[_client].energyCredit;
     }
     
-    function getEnergyToBePaid(address _client) public view returns (int _energyToBePaid){
+    function getEnergyToBePaid(string memory _client) public view returns (int _energyToBePaid){
         return clients[_client].energyToBePaid;
     }   
 }

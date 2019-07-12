@@ -10,7 +10,7 @@
         },
         {
           "name": "_client",
-          "type": "address"
+          "type": "string"
         }
       ],
       "name": "addClient",
@@ -24,7 +24,7 @@
       "inputs": [
         {
           "name": "_client",
-          "type": "address"
+          "type": "string"
         }
       ],
       "name": "getQuotaBought",
@@ -39,12 +39,12 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"_client\",\"type\":\"address\"}],\"name\":\"getQuotaBought\",\"outputs\":[{\"name\":\"_quotaBought\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_quotaBought\",\"type\":\"int256\"},{\"name\":\"_client\",\"type\":\"address\"}],\"name\":\"addClient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol\":\"EnergyQuota\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol\":{\"keccak256\":\"0xe451269b1b632b8260e4207e3d498ccd8fd460154895ddde62f583d49e185b63\",\"urls\":[\"bzzr://e3a963936f882a8e10fa36a3958165c217b88d32a9d3b591f4d88f1d93db5e9e\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b506101a2806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c8063a06ccdb11461003b578063ec82041314610093575b600080fd5b61007d6004803603602081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506100e1565b6040518082815260200191505060405180910390f35b6100df600480360360408110156100a957600080fd5b8101908080359060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061012c565b005b60008060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600001549050919050565b816000808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060000181905550505056fea165627a7a72305820bb4c2378b0b2f513e1160ea687e2437e5cac30cc781428ae3c5ca9b44f886bbe0029",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c8063a06ccdb11461003b578063ec82041314610093575b600080fd5b61007d6004803603602081101561005157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506100e1565b6040518082815260200191505060405180910390f35b6100df600480360360408110156100a957600080fd5b8101908080359060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061012c565b005b60008060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600001549050919050565b816000808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060000181905550505056fea165627a7a72305820bb4c2378b0b2f513e1160ea687e2437e5cac30cc781428ae3c5ca9b44f886bbe0029",
-  "sourceMap": "34:393:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;34:393:1;;;;;;;",
-  "deployedSourceMap": "34:393:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;34:393:1;;;;;;;;;;;;;;;;;;;;;;;;294:131;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;294:131:1;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;164:120;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;164:120:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;294:131;356:16;390:7;:16;398:7;390:16;;;;;;;;;;;;;;;:28;;;383:35;;294:131;;;:::o;164:120::-;265:12;234:7;:16;242:7;234:16;;;;;;;;;;;;;;;:28;;:43;;;;164:120;;:::o",
-  "source": "pragma solidity >=0.4.22 <0.6.0;\n\ncontract EnergyQuota{\n    \n    struct Quota{\n        int quotaBought;\n    }\n    \n    mapping (address => Quota) clients;\n    \n    function addClient(int _quotaBought, address _client) public{\n        clients[_client].quotaBought = _quotaBought;\n    }\n    \n    function getQuotaBought(address _client) public view returns (int _quotaBought){\n        return clients[_client].quotaBought;\n    }\n}\n\ncontract EnergyConsumption{\n\n    \n    struct Client{\n        int energyConsumed;\n        int energyCredit;\n        int energyToBePaid;\n    }\n    \n    mapping (address => Client) clients;\n    \n     \n    function addClient(int _energyConsumed, address _client) public{\n        clients[_client].energyConsumed = _energyConsumed;\n        clients[_client].energyToBePaid = 0;\n        clients[_client].energyCredit = 0;\n    }\n    \n    function manageConsumption(address _client, address _contract) public{\n        int credit = EnergyQuota(_contract).getQuotaBought(_client) - clients[_client].energyConsumed;\n        int toBePaid = clients[_client].energyConsumed- EnergyQuota(_contract).getQuotaBought(_client);\n       \n        clients[_client].energyCredit = (credit > 0) ? credit : 0;\n        clients[_client].energyToBePaid = (toBePaid > 0) ? toBePaid : 0;\n    }\n    \n    function getEnergyConsumed(address _client) public view returns (int _energyConsumed){\n        return clients[_client].energyConsumed;\n    }\n    \n    function getEnergyCredit(address _client) public view returns (int _energyCredit){\n        return clients[_client].energyCredit;\n    }\n    \n    function getEnergyToBePaid(address _client) public view returns (int _energyToBePaid){\n        return clients[_client].energyToBePaid;\n    }   \n}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"_quotaBought\",\"type\":\"int256\"},{\"name\":\"_client\",\"type\":\"string\"}],\"name\":\"addClient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_client\",\"type\":\"string\"}],\"name\":\"getQuotaBought\",\"outputs\":[{\"name\":\"_quotaBought\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol\":\"EnergyQuota\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol\":{\"keccak256\":\"0x20445175761001a85489fd2f0ec94262143c9f8e8c380c2168607cdb9fcef6ee\",\"urls\":[\"bzzr://d6936829fd21c6dc9eef557b162f384642faa5a2e41042db93adb836458250f7\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506102e5806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806339cf4ab41461003b578063700ab8e414610100575b600080fd5b6100fe6004803603604081101561005157600080fd5b81019080803590602001909291908035906020019064010000000081111561007857600080fd5b82018360208201111561008a57600080fd5b803590602001918460018302840111640100000000831117156100ac57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505091929192905050506101cf565b005b6101b96004803603602081101561011657600080fd5b810190808035906020019064010000000081111561013357600080fd5b82018360208201111561014557600080fd5b8035906020019184600183028401116401000000008311171561016757600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290505050610244565b6040518082815260200191505060405180910390f35b816000826040518082805190602001908083835b6020831061020657805182526020820191506020810190506020830392506101e3565b6001836020036101000a0380198251168184511680821785525050505050509050019150509081526020016040518091039020600001819055505050565b600080826040518082805190602001908083835b6020831061027b5780518252602082019150602081019050602083039250610258565b6001836020036101000a038019825116818451168082178552505050505050905001915050908152602001604051809103902060000154905091905056fea165627a7a7230582029d37889e1f4d1b3bfb4ea7879507462027dbc3eb1d5e2d2ed3909470898b1cb0029",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806339cf4ab41461003b578063700ab8e414610100575b600080fd5b6100fe6004803603604081101561005157600080fd5b81019080803590602001909291908035906020019064010000000081111561007857600080fd5b82018360208201111561008a57600080fd5b803590602001918460018302840111640100000000831117156100ac57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505091929192905050506101cf565b005b6101b96004803603602081101561011657600080fd5b810190808035906020019064010000000081111561013357600080fd5b82018360208201111561014557600080fd5b8035906020019184600183028401116401000000008311171561016757600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290505050610244565b6040518082815260200191505060405180910390f35b816000826040518082805190602001908083835b6020831061020657805182526020820191506020810190506020830392506101e3565b6001836020036101000a0380198251168184511680821785525050505050509050019150509081526020016040518091039020600001819055505050565b600080826040518082805190602001908083835b6020831061027b5780518252602082019150602081019050602083039250610258565b6001836020036101000a038019825116818451168082178552505050505050905001915050908152602001604051809103902060000154905091905056fea165627a7a7230582029d37889e1f4d1b3bfb4ea7879507462027dbc3eb1d5e2d2ed3909470898b1cb0029",
+  "sourceMap": "34:404:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;34:404:1;;;;;;;",
+  "deployedSourceMap": "34:404:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;34:404:1;;;;;;;;;;;;;;;;;;;;;;;;163:126;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;163:126:1;;;;;;;;;;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;163:126:1;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;163:126:1;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;163:126:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;163:126:1;;;;;;;;;;;;;;;:::i;:::-;;299:137;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;299:137:1;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;299:137:1;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;299:137:1;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;299:137:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;299:137:1;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;163:126;270:12;239:7;247;239:16;;;;;;;;;;;;;36:153:-1;66:2;61:3;58:11;36:153;;182:3;176:10;171:3;164:23;98:2;93:3;89:12;82:19;;123:2;118:3;114:12;107:19;;148:2;143:3;139:12;132:19;;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;239:16:1;;;;;;;;;;;;;;;;;;;;;:28;;:43;;;;163:126;;:::o;299:137::-;367:16;401:7;409;401:16;;;;;;;;;;;;;36:153:-1;66:2;61:3;58:11;36:153;;182:3;176:10;171:3;164:23;98:2;93:3;89:12;82:19;;123:2;118:3;114:12;107:19;;148:2;143:3;139:12;132:19;;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;401:16:1;;;;;;;;;;;;;;;;;;;;;:28;;;394:35;;299:137;;;:::o",
+  "source": "pragma solidity >=0.4.22 <0.6.0;\n\ncontract EnergyQuota{\n    \n    struct Quota{\n        int quotaBought;\n    }\n    \n    mapping (string => Quota) clients;\n    \n    function addClient(int _quotaBought, string memory _client) public{\n        clients[_client].quotaBought = _quotaBought;\n    }\n    \n    function getQuotaBought(string memory _client) public view returns (int _quotaBought){\n        return clients[_client].quotaBought;\n    }\n}\n\ncontract EnergyConsumption{\n\n    \n    struct Client{\n        int energyConsumed;\n        int energyCredit;\n        int energyToBePaid;\n    }\n    \n    mapping (string => Client) clients;\n    \n     \n    function addClient(int _energyConsumed, string memory _client) public{\n        clients[_client].energyConsumed = _energyConsumed;\n        clients[_client].energyToBePaid = 0;\n        clients[_client].energyCredit = 0;\n    }\n    \n    function manageConsumption(string memory _client, address _contract) public{\n        int credit = EnergyQuota(_contract).getQuotaBought(_client) - clients[_client].energyConsumed;\n        int toBePaid = clients[_client].energyConsumed- EnergyQuota(_contract).getQuotaBought(_client);\n       \n        clients[_client].energyCredit = (credit > 0) ? credit : 0;\n        clients[_client].energyToBePaid = (toBePaid > 0) ? toBePaid : 0;\n    }\n    \n    function getEnergyConsumed(string memory _client) public view returns (int _energyConsumed){\n        return clients[_client].energyConsumed;\n    }\n    \n    function getEnergyCredit(string memory _client) public view returns (int _energyCredit){\n        return clients[_client].energyCredit;\n    }\n    \n    function getEnergyToBePaid(string memory _client) public view returns (int _energyToBePaid){\n        return clients[_client].energyToBePaid;\n    }   \n}",
   "sourcePath": "/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol",
   "ast": {
     "absolutePath": "/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol",
@@ -129,30 +129,30 @@
             "name": "clients",
             "nodeType": "VariableDeclaration",
             "scope": 94,
-            "src": "119:34:1",
+            "src": "119:33:1",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-              "typeString": "mapping(address => struct EnergyQuota.Quota)"
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+              "typeString": "mapping(string => struct EnergyQuota.Quota)"
             },
             "typeName": {
               "id": 64,
               "keyType": {
                 "id": 62,
-                "name": "address",
+                "name": "string",
                 "nodeType": "ElementaryTypeName",
-                "src": "128:7:1",
+                "src": "128:6:1",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
                 }
               },
               "nodeType": "Mapping",
-              "src": "119:26:1",
+              "src": "119:25:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                "typeString": "mapping(address => struct EnergyQuota.Quota)"
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                "typeString": "mapping(string => struct EnergyQuota.Quota)"
               },
               "valueType": {
                 "contractScope": null,
@@ -160,7 +160,7 @@
                 "name": "Quota",
                 "nodeType": "UserDefinedTypeName",
                 "referencedDeclaration": 61,
-                "src": "139:5:1",
+                "src": "138:5:1",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_Quota_$61_storage_ptr",
                   "typeString": "struct EnergyQuota.Quota"
@@ -174,7 +174,7 @@
             "body": {
               "id": 79,
               "nodeType": "Block",
-              "src": "224:60:1",
+              "src": "229:60:1",
               "statements": [
                 {
                   "expression": {
@@ -195,10 +195,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 65,
-                          "src": "234:7:1",
+                          "src": "239:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                            "typeString": "mapping(address => struct EnergyQuota.Quota storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyQuota.Quota storage ref)"
                           }
                         },
                         "id": 74,
@@ -209,10 +209,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 69,
-                          "src": "242:7:1",
+                          "src": "247:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -220,7 +220,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "234:16:1",
+                        "src": "239:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Quota_$61_storage",
                           "typeString": "struct EnergyQuota.Quota storage ref"
@@ -234,7 +234,7 @@
                       "memberName": "quotaBought",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 60,
-                      "src": "234:28:1",
+                      "src": "239:28:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -249,13 +249,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 67,
-                      "src": "265:12:1",
+                      "src": "270:12:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "234:43:1",
+                    "src": "239:43:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -263,7 +263,7 @@
                   },
                   "id": 78,
                   "nodeType": "ExpressionStatement",
-                  "src": "234:43:1"
+                  "src": "239:43:1"
                 }
               ]
             },
@@ -284,7 +284,7 @@
                   "name": "_quotaBought",
                   "nodeType": "VariableDeclaration",
                   "scope": 80,
-                  "src": "183:16:1",
+                  "src": "182:16:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -295,7 +295,7 @@
                     "id": 66,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "183:3:1",
+                    "src": "182:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -310,38 +310,37 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 80,
-                  "src": "201:15:1",
+                  "src": "200:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 68,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "201:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "200:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "182:35:1"
+              "src": "181:41:1"
             },
             "returnParameters": {
               "id": 71,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "224:0:1"
+              "src": "229:0:1"
             },
             "scope": 94,
-            "src": "164:120:1",
+            "src": "163:126:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -350,7 +349,7 @@
             "body": {
               "id": 92,
               "nodeType": "Block",
-              "src": "373:52:1",
+              "src": "384:52:1",
               "statements": [
                 {
                   "expression": {
@@ -364,10 +363,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 65,
-                        "src": "390:7:1",
+                        "src": "401:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                          "typeString": "mapping(address => struct EnergyQuota.Quota storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyQuota.Quota storage ref)"
                         }
                       },
                       "id": 89,
@@ -378,10 +377,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 82,
-                        "src": "398:7:1",
+                        "src": "409:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -389,7 +388,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "390:16:1",
+                      "src": "401:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Quota_$61_storage",
                         "typeString": "struct EnergyQuota.Quota storage ref"
@@ -403,7 +402,7 @@
                     "memberName": "quotaBought",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 60,
-                    "src": "390:28:1",
+                    "src": "401:28:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -412,7 +411,7 @@
                   "functionReturnParameters": 86,
                   "id": 91,
                   "nodeType": "Return",
-                  "src": "383:35:1"
+                  "src": "394:35:1"
                 }
               ]
             },
@@ -433,29 +432,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 93,
-                  "src": "318:15:1",
+                  "src": "323:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 81,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "318:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "323:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "317:17:1"
+              "src": "322:23:1"
             },
             "returnParameters": {
               "id": 86,
@@ -467,7 +465,7 @@
                   "name": "_quotaBought",
                   "nodeType": "VariableDeclaration",
                   "scope": 93,
-                  "src": "356:16:1",
+                  "src": "367:16:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -478,7 +476,7 @@
                     "id": 84,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "356:3:1",
+                    "src": "367:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -488,17 +486,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "355:18:1"
+              "src": "366:18:1"
             },
             "scope": 94,
-            "src": "294:131:1",
+            "src": "299:137:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 237,
-        "src": "34:393:1"
+        "src": "34:404:1"
       },
       {
         "baseContracts": [],
@@ -523,7 +521,7 @@
                 "name": "energyConsumed",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "490:18:1",
+                "src": "501:18:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -534,7 +532,7 @@
                   "id": 95,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "490:3:1",
+                  "src": "501:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -549,7 +547,7 @@
                 "name": "energyCredit",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "518:16:1",
+                "src": "529:16:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -560,7 +558,7 @@
                   "id": 97,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "518:3:1",
+                  "src": "529:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -575,7 +573,7 @@
                 "name": "energyToBePaid",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "544:18:1",
+                "src": "555:18:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -586,7 +584,7 @@
                   "id": 99,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "544:3:1",
+                  "src": "555:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -599,7 +597,7 @@
             "name": "Client",
             "nodeType": "StructDefinition",
             "scope": 236,
-            "src": "467:102:1",
+            "src": "478:102:1",
             "visibility": "public"
           },
           {
@@ -608,30 +606,30 @@
             "name": "clients",
             "nodeType": "VariableDeclaration",
             "scope": 236,
-            "src": "579:35:1",
+            "src": "590:34:1",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-              "typeString": "mapping(address => struct EnergyConsumption.Client)"
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+              "typeString": "mapping(string => struct EnergyConsumption.Client)"
             },
             "typeName": {
               "id": 104,
               "keyType": {
                 "id": 102,
-                "name": "address",
+                "name": "string",
                 "nodeType": "ElementaryTypeName",
-                "src": "588:7:1",
+                "src": "599:6:1",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
                 }
               },
               "nodeType": "Mapping",
-              "src": "579:27:1",
+              "src": "590:26:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                "typeString": "mapping(address => struct EnergyConsumption.Client)"
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                "typeString": "mapping(string => struct EnergyConsumption.Client)"
               },
               "valueType": {
                 "contractScope": null,
@@ -639,7 +637,7 @@
                 "name": "Client",
                 "nodeType": "UserDefinedTypeName",
                 "referencedDeclaration": 101,
-                "src": "599:6:1",
+                "src": "609:6:1",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_Client_$101_storage_ptr",
                   "typeString": "struct EnergyConsumption.Client"
@@ -653,7 +651,7 @@
             "body": {
               "id": 133,
               "nodeType": "Block",
-              "src": "694:154:1",
+              "src": "710:154:1",
               "statements": [
                 {
                   "expression": {
@@ -674,10 +672,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "704:7:1",
+                          "src": "720:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 114,
@@ -688,10 +686,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "712:7:1",
+                          "src": "728:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -699,7 +697,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "704:16:1",
+                        "src": "720:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -713,7 +711,7 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "704:31:1",
+                      "src": "720:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -728,13 +726,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 107,
-                      "src": "738:15:1",
+                      "src": "754:15:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "704:49:1",
+                    "src": "720:49:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -742,7 +740,7 @@
                   },
                   "id": 118,
                   "nodeType": "ExpressionStatement",
-                  "src": "704:49:1"
+                  "src": "720:49:1"
                 },
                 {
                   "expression": {
@@ -763,10 +761,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "763:7:1",
+                          "src": "779:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 121,
@@ -777,10 +775,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "771:7:1",
+                          "src": "787:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -788,7 +786,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "763:16:1",
+                        "src": "779:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -802,7 +800,7 @@
                       "memberName": "energyToBePaid",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 100,
-                      "src": "763:31:1",
+                      "src": "779:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -820,7 +818,7 @@
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "797:1:1",
+                      "src": "813:1:1",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -828,7 +826,7 @@
                       },
                       "value": "0"
                     },
-                    "src": "763:35:1",
+                    "src": "779:35:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -836,7 +834,7 @@
                   },
                   "id": 125,
                   "nodeType": "ExpressionStatement",
-                  "src": "763:35:1"
+                  "src": "779:35:1"
                 },
                 {
                   "expression": {
@@ -857,10 +855,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "808:7:1",
+                          "src": "824:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 128,
@@ -871,10 +869,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "816:7:1",
+                          "src": "832:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -882,7 +880,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "808:16:1",
+                        "src": "824:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -896,7 +894,7 @@
                       "memberName": "energyCredit",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 98,
-                      "src": "808:29:1",
+                      "src": "824:29:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -914,7 +912,7 @@
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "840:1:1",
+                      "src": "856:1:1",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -922,7 +920,7 @@
                       },
                       "value": "0"
                     },
-                    "src": "808:33:1",
+                    "src": "824:33:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -930,7 +928,7 @@
                   },
                   "id": 132,
                   "nodeType": "ExpressionStatement",
-                  "src": "808:33:1"
+                  "src": "824:33:1"
                 }
               ]
             },
@@ -951,7 +949,7 @@
                   "name": "_energyConsumed",
                   "nodeType": "VariableDeclaration",
                   "scope": 134,
-                  "src": "650:19:1",
+                  "src": "660:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -962,7 +960,7 @@
                     "id": 106,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "650:3:1",
+                    "src": "660:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -977,38 +975,37 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 134,
-                  "src": "671:15:1",
+                  "src": "681:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 108,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "671:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "681:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "649:38:1"
+              "src": "659:44:1"
             },
             "returnParameters": {
               "id": 111,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "694:0:1"
+              "src": "710:0:1"
             },
             "scope": 236,
-            "src": "631:217:1",
+            "src": "641:223:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1017,7 +1014,7 @@
             "body": {
               "id": 195,
               "nodeType": "Block",
-              "src": "927:362:1",
+              "src": "949:362:1",
               "statements": [
                 {
                   "assignments": [
@@ -1030,7 +1027,7 @@
                       "name": "credit",
                       "nodeType": "VariableDeclaration",
                       "scope": 195,
-                      "src": "937:10:1",
+                      "src": "959:10:1",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1041,7 +1038,7 @@
                         "id": 141,
                         "name": "int",
                         "nodeType": "ElementaryTypeName",
-                        "src": "937:3:1",
+                        "src": "959:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -1073,18 +1070,18 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "988:7:1",
+                          "src": "1010:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         }
                       ],
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         ],
                         "expression": {
@@ -1097,7 +1094,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 138,
-                              "src": "962:9:1",
+                              "src": "984:9:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -1116,7 +1113,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 94,
-                            "src": "950:11:1",
+                            "src": "972:11:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_contract$_EnergyQuota_$94_$",
                               "typeString": "type(contract EnergyQuota)"
@@ -1130,7 +1127,7 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "950:22:1",
+                          "src": "972:22:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_EnergyQuota_$94",
                             "typeString": "contract EnergyQuota"
@@ -1144,10 +1141,10 @@
                         "memberName": "getQuotaBought",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 93,
-                        "src": "950:37:1",
+                        "src": "972:37:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_int256_$",
-                          "typeString": "function (address) view external returns (int256)"
+                          "typeIdentifier": "t_function_external_view$_t_string_memory_ptr_$returns$_t_int256_$",
+                          "typeString": "function (string memory) view external returns (int256)"
                         }
                       },
                       "id": 148,
@@ -1158,7 +1155,7 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "950:46:1",
+                      "src": "972:46:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -1177,10 +1174,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "999:7:1",
+                          "src": "1021:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 151,
@@ -1191,10 +1188,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1007:7:1",
+                          "src": "1029:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -1202,7 +1199,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "999:16:1",
+                        "src": "1021:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -1216,20 +1213,20 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "999:31:1",
+                      "src": "1021:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "950:80:1",
+                    "src": "972:80:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "937:93:1"
+                  "src": "959:93:1"
                 },
                 {
                   "assignments": [
@@ -1242,7 +1239,7 @@
                       "name": "toBePaid",
                       "nodeType": "VariableDeclaration",
                       "scope": 195,
-                      "src": "1040:12:1",
+                      "src": "1062:12:1",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -1253,7 +1250,7 @@
                         "id": 155,
                         "name": "int",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1040:3:1",
+                        "src": "1062:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -1286,10 +1283,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1055:7:1",
+                          "src": "1077:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 159,
@@ -1300,10 +1297,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1063:7:1",
+                          "src": "1085:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -1311,7 +1308,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1055:16:1",
+                        "src": "1077:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -1325,7 +1322,7 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "1055:31:1",
+                      "src": "1077:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -1343,18 +1340,18 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1126:7:1",
+                          "src": "1148:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         }
                       ],
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         ],
                         "expression": {
@@ -1367,7 +1364,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 138,
-                              "src": "1100:9:1",
+                              "src": "1122:9:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -1386,7 +1383,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 94,
-                            "src": "1088:11:1",
+                            "src": "1110:11:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_contract$_EnergyQuota_$94_$",
                               "typeString": "type(contract EnergyQuota)"
@@ -1400,7 +1397,7 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1088:22:1",
+                          "src": "1110:22:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_EnergyQuota_$94",
                             "typeString": "contract EnergyQuota"
@@ -1414,10 +1411,10 @@
                         "memberName": "getQuotaBought",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 93,
-                        "src": "1088:37:1",
+                        "src": "1110:37:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_int256_$",
-                          "typeString": "function (address) view external returns (int256)"
+                          "typeIdentifier": "t_function_external_view$_t_string_memory_ptr_$returns$_t_int256_$",
+                          "typeString": "function (string memory) view external returns (int256)"
                         }
                       },
                       "id": 166,
@@ -1428,20 +1425,20 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1088:46:1",
+                      "src": "1110:46:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "1055:79:1",
+                    "src": "1077:79:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1040:94:1"
+                  "src": "1062:94:1"
                 },
                 {
                   "expression": {
@@ -1462,10 +1459,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1152:7:1",
+                          "src": "1174:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 171,
@@ -1476,10 +1473,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1160:7:1",
+                          "src": "1182:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -1487,7 +1484,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1152:16:1",
+                        "src": "1174:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -1501,7 +1498,7 @@
                       "memberName": "energyCredit",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 98,
-                      "src": "1152:29:1",
+                      "src": "1174:29:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -1532,7 +1529,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 142,
-                              "src": "1185:6:1",
+                              "src": "1207:6:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
                                 "typeString": "int256"
@@ -1550,7 +1547,7 @@
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1194:1:1",
+                              "src": "1216:1:1",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -1558,7 +1555,7 @@
                               },
                               "value": "0"
                             },
-                            "src": "1185:10:1",
+                            "src": "1207:10:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bool",
                               "typeString": "bool"
@@ -1572,7 +1569,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "TupleExpression",
-                        "src": "1184:12:1",
+                        "src": "1206:12:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1588,7 +1585,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "1208:1:1",
+                        "src": "1230:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -1602,7 +1599,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "Conditional",
-                      "src": "1184:25:1",
+                      "src": "1206:25:1",
                       "trueExpression": {
                         "argumentTypes": null,
                         "id": 177,
@@ -1610,7 +1607,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 142,
-                        "src": "1199:6:1",
+                        "src": "1221:6:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -1621,7 +1618,7 @@
                         "typeString": "int256"
                       }
                     },
-                    "src": "1152:57:1",
+                    "src": "1174:57:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -1629,7 +1626,7 @@
                   },
                   "id": 181,
                   "nodeType": "ExpressionStatement",
-                  "src": "1152:57:1"
+                  "src": "1174:57:1"
                 },
                 {
                   "expression": {
@@ -1650,10 +1647,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1219:7:1",
+                          "src": "1241:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 184,
@@ -1664,10 +1661,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1227:7:1",
+                          "src": "1249:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -1675,7 +1672,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1219:16:1",
+                        "src": "1241:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -1689,7 +1686,7 @@
                       "memberName": "energyToBePaid",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 100,
-                      "src": "1219:31:1",
+                      "src": "1241:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -1720,7 +1717,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 156,
-                              "src": "1254:8:1",
+                              "src": "1276:8:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
                                 "typeString": "int256"
@@ -1738,7 +1735,7 @@
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1265:1:1",
+                              "src": "1287:1:1",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -1746,7 +1743,7 @@
                               },
                               "value": "0"
                             },
-                            "src": "1254:12:1",
+                            "src": "1276:12:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bool",
                               "typeString": "bool"
@@ -1760,7 +1757,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "TupleExpression",
-                        "src": "1253:14:1",
+                        "src": "1275:14:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -1776,7 +1773,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "1281:1:1",
+                        "src": "1303:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -1790,7 +1787,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "Conditional",
-                      "src": "1253:29:1",
+                      "src": "1275:29:1",
                       "trueExpression": {
                         "argumentTypes": null,
                         "id": 190,
@@ -1798,7 +1795,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 156,
-                        "src": "1270:8:1",
+                        "src": "1292:8:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -1809,7 +1806,7 @@
                         "typeString": "int256"
                       }
                     },
-                    "src": "1219:63:1",
+                    "src": "1241:63:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -1817,7 +1814,7 @@
                   },
                   "id": 194,
                   "nodeType": "ExpressionStatement",
-                  "src": "1219:63:1"
+                  "src": "1241:63:1"
                 }
               ]
             },
@@ -1838,22 +1835,21 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 196,
-                  "src": "885:15:1",
+                  "src": "901:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 135,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "885:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "901:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
@@ -1865,7 +1861,7 @@
                   "name": "_contract",
                   "nodeType": "VariableDeclaration",
                   "scope": 196,
-                  "src": "902:17:1",
+                  "src": "924:17:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1876,7 +1872,7 @@
                     "id": 137,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "902:7:1",
+                    "src": "924:7:1",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1887,16 +1883,16 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "884:36:1"
+              "src": "900:42:1"
             },
             "returnParameters": {
               "id": 140,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "927:0:1"
+              "src": "949:0:1"
             },
             "scope": 236,
-            "src": "858:431:1",
+            "src": "874:437:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -1905,7 +1901,7 @@
             "body": {
               "id": 208,
               "nodeType": "Block",
-              "src": "1384:55:1",
+              "src": "1412:55:1",
               "statements": [
                 {
                   "expression": {
@@ -1919,10 +1915,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1401:7:1",
+                        "src": "1429:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 205,
@@ -1933,10 +1929,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 198,
-                        "src": "1409:7:1",
+                        "src": "1437:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -1944,7 +1940,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1401:16:1",
+                      "src": "1429:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -1958,7 +1954,7 @@
                     "memberName": "energyConsumed",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 96,
-                    "src": "1401:31:1",
+                    "src": "1429:31:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -1967,7 +1963,7 @@
                   "functionReturnParameters": 202,
                   "id": 207,
                   "nodeType": "Return",
-                  "src": "1394:38:1"
+                  "src": "1422:38:1"
                 }
               ]
             },
@@ -1988,29 +1984,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 209,
-                  "src": "1326:15:1",
+                  "src": "1348:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 197,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1326:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1348:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1325:17:1"
+              "src": "1347:23:1"
             },
             "returnParameters": {
               "id": 202,
@@ -2022,7 +2017,7 @@
                   "name": "_energyConsumed",
                   "nodeType": "VariableDeclaration",
                   "scope": 209,
-                  "src": "1364:19:1",
+                  "src": "1392:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2033,7 +2028,7 @@
                     "id": 200,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1364:3:1",
+                    "src": "1392:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2043,10 +2038,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1363:21:1"
+              "src": "1391:21:1"
             },
             "scope": 236,
-            "src": "1299:140:1",
+            "src": "1321:146:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -2055,7 +2050,7 @@
             "body": {
               "id": 221,
               "nodeType": "Block",
-              "src": "1530:53:1",
+              "src": "1564:53:1",
               "statements": [
                 {
                   "expression": {
@@ -2069,10 +2064,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1547:7:1",
+                        "src": "1581:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 218,
@@ -2083,10 +2078,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 211,
-                        "src": "1555:7:1",
+                        "src": "1589:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -2094,7 +2089,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1547:16:1",
+                      "src": "1581:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -2108,7 +2103,7 @@
                     "memberName": "energyCredit",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 98,
-                    "src": "1547:29:1",
+                    "src": "1581:29:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2117,7 +2112,7 @@
                   "functionReturnParameters": 215,
                   "id": 220,
                   "nodeType": "Return",
-                  "src": "1540:36:1"
+                  "src": "1574:36:1"
                 }
               ]
             },
@@ -2138,29 +2133,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 222,
-                  "src": "1474:15:1",
+                  "src": "1502:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 210,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1474:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1502:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1473:17:1"
+              "src": "1501:23:1"
             },
             "returnParameters": {
               "id": 215,
@@ -2172,7 +2166,7 @@
                   "name": "_energyCredit",
                   "nodeType": "VariableDeclaration",
                   "scope": 222,
-                  "src": "1512:17:1",
+                  "src": "1546:17:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2183,7 +2177,7 @@
                     "id": 213,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1512:3:1",
+                    "src": "1546:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2193,10 +2187,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1511:19:1"
+              "src": "1545:19:1"
             },
             "scope": 236,
-            "src": "1449:134:1",
+            "src": "1477:140:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -2205,7 +2199,7 @@
             "body": {
               "id": 234,
               "nodeType": "Block",
-              "src": "1678:55:1",
+              "src": "1718:55:1",
               "statements": [
                 {
                   "expression": {
@@ -2219,10 +2213,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1695:7:1",
+                        "src": "1735:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 231,
@@ -2233,10 +2227,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 224,
-                        "src": "1703:7:1",
+                        "src": "1743:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -2244,7 +2238,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1695:16:1",
+                      "src": "1735:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -2258,7 +2252,7 @@
                     "memberName": "energyToBePaid",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 100,
-                    "src": "1695:31:1",
+                    "src": "1735:31:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2267,7 +2261,7 @@
                   "functionReturnParameters": 228,
                   "id": 233,
                   "nodeType": "Return",
-                  "src": "1688:38:1"
+                  "src": "1728:38:1"
                 }
               ]
             },
@@ -2288,29 +2282,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 235,
-                  "src": "1620:15:1",
+                  "src": "1654:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 223,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1620:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1654:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1619:17:1"
+              "src": "1653:23:1"
             },
             "returnParameters": {
               "id": 228,
@@ -2322,7 +2315,7 @@
                   "name": "_energyToBePaid",
                   "nodeType": "VariableDeclaration",
                   "scope": 235,
-                  "src": "1658:19:1",
+                  "src": "1698:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2333,7 +2326,7 @@
                     "id": 226,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1658:3:1",
+                    "src": "1698:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2343,20 +2336,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1657:21:1"
+              "src": "1697:21:1"
             },
             "scope": 236,
-            "src": "1593:140:1",
+            "src": "1627:146:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 237,
-        "src": "429:1309:1"
+        "src": "440:1338:1"
       }
     ],
-    "src": "0:1738:1"
+    "src": "0:1778:1"
   },
   "legacyAST": {
     "absolutePath": "/home/garaujo/Desktop/blockChain/SolarBlockchain/contracts/energyQuota.sol",
@@ -2441,30 +2434,30 @@
             "name": "clients",
             "nodeType": "VariableDeclaration",
             "scope": 94,
-            "src": "119:34:1",
+            "src": "119:33:1",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-              "typeString": "mapping(address => struct EnergyQuota.Quota)"
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+              "typeString": "mapping(string => struct EnergyQuota.Quota)"
             },
             "typeName": {
               "id": 64,
               "keyType": {
                 "id": 62,
-                "name": "address",
+                "name": "string",
                 "nodeType": "ElementaryTypeName",
-                "src": "128:7:1",
+                "src": "128:6:1",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
                 }
               },
               "nodeType": "Mapping",
-              "src": "119:26:1",
+              "src": "119:25:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                "typeString": "mapping(address => struct EnergyQuota.Quota)"
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                "typeString": "mapping(string => struct EnergyQuota.Quota)"
               },
               "valueType": {
                 "contractScope": null,
@@ -2472,7 +2465,7 @@
                 "name": "Quota",
                 "nodeType": "UserDefinedTypeName",
                 "referencedDeclaration": 61,
-                "src": "139:5:1",
+                "src": "138:5:1",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_Quota_$61_storage_ptr",
                   "typeString": "struct EnergyQuota.Quota"
@@ -2486,7 +2479,7 @@
             "body": {
               "id": 79,
               "nodeType": "Block",
-              "src": "224:60:1",
+              "src": "229:60:1",
               "statements": [
                 {
                   "expression": {
@@ -2507,10 +2500,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 65,
-                          "src": "234:7:1",
+                          "src": "239:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                            "typeString": "mapping(address => struct EnergyQuota.Quota storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyQuota.Quota storage ref)"
                           }
                         },
                         "id": 74,
@@ -2521,10 +2514,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 69,
-                          "src": "242:7:1",
+                          "src": "247:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -2532,7 +2525,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "234:16:1",
+                        "src": "239:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Quota_$61_storage",
                           "typeString": "struct EnergyQuota.Quota storage ref"
@@ -2546,7 +2539,7 @@
                       "memberName": "quotaBought",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 60,
-                      "src": "234:28:1",
+                      "src": "239:28:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -2561,13 +2554,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 67,
-                      "src": "265:12:1",
+                      "src": "270:12:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "234:43:1",
+                    "src": "239:43:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2575,7 +2568,7 @@
                   },
                   "id": 78,
                   "nodeType": "ExpressionStatement",
-                  "src": "234:43:1"
+                  "src": "239:43:1"
                 }
               ]
             },
@@ -2596,7 +2589,7 @@
                   "name": "_quotaBought",
                   "nodeType": "VariableDeclaration",
                   "scope": 80,
-                  "src": "183:16:1",
+                  "src": "182:16:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2607,7 +2600,7 @@
                     "id": 66,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "183:3:1",
+                    "src": "182:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2622,38 +2615,37 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 80,
-                  "src": "201:15:1",
+                  "src": "200:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 68,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "201:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "200:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "182:35:1"
+              "src": "181:41:1"
             },
             "returnParameters": {
               "id": 71,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "224:0:1"
+              "src": "229:0:1"
             },
             "scope": 94,
-            "src": "164:120:1",
+            "src": "163:126:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -2662,7 +2654,7 @@
             "body": {
               "id": 92,
               "nodeType": "Block",
-              "src": "373:52:1",
+              "src": "384:52:1",
               "statements": [
                 {
                   "expression": {
@@ -2676,10 +2668,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 65,
-                        "src": "390:7:1",
+                        "src": "401:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Quota_$61_storage_$",
-                          "typeString": "mapping(address => struct EnergyQuota.Quota storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Quota_$61_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyQuota.Quota storage ref)"
                         }
                       },
                       "id": 89,
@@ -2690,10 +2682,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 82,
-                        "src": "398:7:1",
+                        "src": "409:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -2701,7 +2693,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "390:16:1",
+                      "src": "401:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Quota_$61_storage",
                         "typeString": "struct EnergyQuota.Quota storage ref"
@@ -2715,7 +2707,7 @@
                     "memberName": "quotaBought",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 60,
-                    "src": "390:28:1",
+                    "src": "401:28:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2724,7 +2716,7 @@
                   "functionReturnParameters": 86,
                   "id": 91,
                   "nodeType": "Return",
-                  "src": "383:35:1"
+                  "src": "394:35:1"
                 }
               ]
             },
@@ -2745,29 +2737,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 93,
-                  "src": "318:15:1",
+                  "src": "323:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 81,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "318:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "323:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "317:17:1"
+              "src": "322:23:1"
             },
             "returnParameters": {
               "id": 86,
@@ -2779,7 +2770,7 @@
                   "name": "_quotaBought",
                   "nodeType": "VariableDeclaration",
                   "scope": 93,
-                  "src": "356:16:1",
+                  "src": "367:16:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2790,7 +2781,7 @@
                     "id": 84,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "356:3:1",
+                    "src": "367:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -2800,17 +2791,17 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "355:18:1"
+              "src": "366:18:1"
             },
             "scope": 94,
-            "src": "294:131:1",
+            "src": "299:137:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 237,
-        "src": "34:393:1"
+        "src": "34:404:1"
       },
       {
         "baseContracts": [],
@@ -2835,7 +2826,7 @@
                 "name": "energyConsumed",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "490:18:1",
+                "src": "501:18:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2846,7 +2837,7 @@
                   "id": 95,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "490:3:1",
+                  "src": "501:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -2861,7 +2852,7 @@
                 "name": "energyCredit",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "518:16:1",
+                "src": "529:16:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2872,7 +2863,7 @@
                   "id": 97,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "518:3:1",
+                  "src": "529:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -2887,7 +2878,7 @@
                 "name": "energyToBePaid",
                 "nodeType": "VariableDeclaration",
                 "scope": 101,
-                "src": "544:18:1",
+                "src": "555:18:1",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2898,7 +2889,7 @@
                   "id": 99,
                   "name": "int",
                   "nodeType": "ElementaryTypeName",
-                  "src": "544:3:1",
+                  "src": "555:3:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_int256",
                     "typeString": "int256"
@@ -2911,7 +2902,7 @@
             "name": "Client",
             "nodeType": "StructDefinition",
             "scope": 236,
-            "src": "467:102:1",
+            "src": "478:102:1",
             "visibility": "public"
           },
           {
@@ -2920,30 +2911,30 @@
             "name": "clients",
             "nodeType": "VariableDeclaration",
             "scope": 236,
-            "src": "579:35:1",
+            "src": "590:34:1",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-              "typeString": "mapping(address => struct EnergyConsumption.Client)"
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+              "typeString": "mapping(string => struct EnergyConsumption.Client)"
             },
             "typeName": {
               "id": 104,
               "keyType": {
                 "id": 102,
-                "name": "address",
+                "name": "string",
                 "nodeType": "ElementaryTypeName",
-                "src": "588:7:1",
+                "src": "599:6:1",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_address",
-                  "typeString": "address"
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
                 }
               },
               "nodeType": "Mapping",
-              "src": "579:27:1",
+              "src": "590:26:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                "typeString": "mapping(address => struct EnergyConsumption.Client)"
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                "typeString": "mapping(string => struct EnergyConsumption.Client)"
               },
               "valueType": {
                 "contractScope": null,
@@ -2951,7 +2942,7 @@
                 "name": "Client",
                 "nodeType": "UserDefinedTypeName",
                 "referencedDeclaration": 101,
-                "src": "599:6:1",
+                "src": "609:6:1",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_Client_$101_storage_ptr",
                   "typeString": "struct EnergyConsumption.Client"
@@ -2965,7 +2956,7 @@
             "body": {
               "id": 133,
               "nodeType": "Block",
-              "src": "694:154:1",
+              "src": "710:154:1",
               "statements": [
                 {
                   "expression": {
@@ -2986,10 +2977,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "704:7:1",
+                          "src": "720:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 114,
@@ -3000,10 +2991,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "712:7:1",
+                          "src": "728:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3011,7 +3002,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "704:16:1",
+                        "src": "720:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3025,7 +3016,7 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "704:31:1",
+                      "src": "720:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3040,13 +3031,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 107,
-                      "src": "738:15:1",
+                      "src": "754:15:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "704:49:1",
+                    "src": "720:49:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -3054,7 +3045,7 @@
                   },
                   "id": 118,
                   "nodeType": "ExpressionStatement",
-                  "src": "704:49:1"
+                  "src": "720:49:1"
                 },
                 {
                   "expression": {
@@ -3075,10 +3066,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "763:7:1",
+                          "src": "779:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 121,
@@ -3089,10 +3080,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "771:7:1",
+                          "src": "787:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3100,7 +3091,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "763:16:1",
+                        "src": "779:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3114,7 +3105,7 @@
                       "memberName": "energyToBePaid",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 100,
-                      "src": "763:31:1",
+                      "src": "779:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3132,7 +3123,7 @@
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "797:1:1",
+                      "src": "813:1:1",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -3140,7 +3131,7 @@
                       },
                       "value": "0"
                     },
-                    "src": "763:35:1",
+                    "src": "779:35:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -3148,7 +3139,7 @@
                   },
                   "id": 125,
                   "nodeType": "ExpressionStatement",
-                  "src": "763:35:1"
+                  "src": "779:35:1"
                 },
                 {
                   "expression": {
@@ -3169,10 +3160,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "808:7:1",
+                          "src": "824:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 128,
@@ -3183,10 +3174,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 109,
-                          "src": "816:7:1",
+                          "src": "832:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3194,7 +3185,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "808:16:1",
+                        "src": "824:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3208,7 +3199,7 @@
                       "memberName": "energyCredit",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 98,
-                      "src": "808:29:1",
+                      "src": "824:29:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3226,7 +3217,7 @@
                       "kind": "number",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "840:1:1",
+                      "src": "856:1:1",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_rational_0_by_1",
@@ -3234,7 +3225,7 @@
                       },
                       "value": "0"
                     },
-                    "src": "808:33:1",
+                    "src": "824:33:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -3242,7 +3233,7 @@
                   },
                   "id": 132,
                   "nodeType": "ExpressionStatement",
-                  "src": "808:33:1"
+                  "src": "824:33:1"
                 }
               ]
             },
@@ -3263,7 +3254,7 @@
                   "name": "_energyConsumed",
                   "nodeType": "VariableDeclaration",
                   "scope": 134,
-                  "src": "650:19:1",
+                  "src": "660:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3274,7 +3265,7 @@
                     "id": 106,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "650:3:1",
+                    "src": "660:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -3289,38 +3280,37 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 134,
-                  "src": "671:15:1",
+                  "src": "681:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 108,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "671:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "681:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "649:38:1"
+              "src": "659:44:1"
             },
             "returnParameters": {
               "id": 111,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "694:0:1"
+              "src": "710:0:1"
             },
             "scope": 236,
-            "src": "631:217:1",
+            "src": "641:223:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -3329,7 +3319,7 @@
             "body": {
               "id": 195,
               "nodeType": "Block",
-              "src": "927:362:1",
+              "src": "949:362:1",
               "statements": [
                 {
                   "assignments": [
@@ -3342,7 +3332,7 @@
                       "name": "credit",
                       "nodeType": "VariableDeclaration",
                       "scope": 195,
-                      "src": "937:10:1",
+                      "src": "959:10:1",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -3353,7 +3343,7 @@
                         "id": 141,
                         "name": "int",
                         "nodeType": "ElementaryTypeName",
-                        "src": "937:3:1",
+                        "src": "959:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -3385,18 +3375,18 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "988:7:1",
+                          "src": "1010:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         }
                       ],
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         ],
                         "expression": {
@@ -3409,7 +3399,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 138,
-                              "src": "962:9:1",
+                              "src": "984:9:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -3428,7 +3418,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 94,
-                            "src": "950:11:1",
+                            "src": "972:11:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_contract$_EnergyQuota_$94_$",
                               "typeString": "type(contract EnergyQuota)"
@@ -3442,7 +3432,7 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "950:22:1",
+                          "src": "972:22:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_EnergyQuota_$94",
                             "typeString": "contract EnergyQuota"
@@ -3456,10 +3446,10 @@
                         "memberName": "getQuotaBought",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 93,
-                        "src": "950:37:1",
+                        "src": "972:37:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_int256_$",
-                          "typeString": "function (address) view external returns (int256)"
+                          "typeIdentifier": "t_function_external_view$_t_string_memory_ptr_$returns$_t_int256_$",
+                          "typeString": "function (string memory) view external returns (int256)"
                         }
                       },
                       "id": 148,
@@ -3470,7 +3460,7 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "950:46:1",
+                      "src": "972:46:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3489,10 +3479,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "999:7:1",
+                          "src": "1021:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 151,
@@ -3503,10 +3493,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1007:7:1",
+                          "src": "1029:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3514,7 +3504,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "999:16:1",
+                        "src": "1021:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3528,20 +3518,20 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "999:31:1",
+                      "src": "1021:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "950:80:1",
+                    "src": "972:80:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "937:93:1"
+                  "src": "959:93:1"
                 },
                 {
                   "assignments": [
@@ -3554,7 +3544,7 @@
                       "name": "toBePaid",
                       "nodeType": "VariableDeclaration",
                       "scope": 195,
-                      "src": "1040:12:1",
+                      "src": "1062:12:1",
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
@@ -3565,7 +3555,7 @@
                         "id": 155,
                         "name": "int",
                         "nodeType": "ElementaryTypeName",
-                        "src": "1040:3:1",
+                        "src": "1062:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -3598,10 +3588,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1055:7:1",
+                          "src": "1077:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 159,
@@ -3612,10 +3602,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1063:7:1",
+                          "src": "1085:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3623,7 +3613,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1055:16:1",
+                        "src": "1077:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3637,7 +3627,7 @@
                       "memberName": "energyConsumed",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 96,
-                      "src": "1055:31:1",
+                      "src": "1077:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3655,18 +3645,18 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1126:7:1",
+                          "src": "1148:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         }
                       ],
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         ],
                         "expression": {
@@ -3679,7 +3669,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 138,
-                              "src": "1100:9:1",
+                              "src": "1122:9:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_address",
                                 "typeString": "address"
@@ -3698,7 +3688,7 @@
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": 94,
-                            "src": "1088:11:1",
+                            "src": "1110:11:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_type$_t_contract$_EnergyQuota_$94_$",
                               "typeString": "type(contract EnergyQuota)"
@@ -3712,7 +3702,7 @@
                           "lValueRequested": false,
                           "names": [],
                           "nodeType": "FunctionCall",
-                          "src": "1088:22:1",
+                          "src": "1110:22:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_contract$_EnergyQuota_$94",
                             "typeString": "contract EnergyQuota"
@@ -3726,10 +3716,10 @@
                         "memberName": "getQuotaBought",
                         "nodeType": "MemberAccess",
                         "referencedDeclaration": 93,
-                        "src": "1088:37:1",
+                        "src": "1110:37:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_int256_$",
-                          "typeString": "function (address) view external returns (int256)"
+                          "typeIdentifier": "t_function_external_view$_t_string_memory_ptr_$returns$_t_int256_$",
+                          "typeString": "function (string memory) view external returns (int256)"
                         }
                       },
                       "id": 166,
@@ -3740,20 +3730,20 @@
                       "lValueRequested": false,
                       "names": [],
                       "nodeType": "FunctionCall",
-                      "src": "1088:46:1",
+                      "src": "1110:46:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "src": "1055:79:1",
+                    "src": "1077:79:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
                     }
                   },
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "1040:94:1"
+                  "src": "1062:94:1"
                 },
                 {
                   "expression": {
@@ -3774,10 +3764,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1152:7:1",
+                          "src": "1174:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 171,
@@ -3788,10 +3778,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1160:7:1",
+                          "src": "1182:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3799,7 +3789,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1152:16:1",
+                        "src": "1174:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -3813,7 +3803,7 @@
                       "memberName": "energyCredit",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 98,
-                      "src": "1152:29:1",
+                      "src": "1174:29:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -3844,7 +3834,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 142,
-                              "src": "1185:6:1",
+                              "src": "1207:6:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
                                 "typeString": "int256"
@@ -3862,7 +3852,7 @@
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1194:1:1",
+                              "src": "1216:1:1",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -3870,7 +3860,7 @@
                               },
                               "value": "0"
                             },
-                            "src": "1185:10:1",
+                            "src": "1207:10:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bool",
                               "typeString": "bool"
@@ -3884,7 +3874,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "TupleExpression",
-                        "src": "1184:12:1",
+                        "src": "1206:12:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -3900,7 +3890,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "1208:1:1",
+                        "src": "1230:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -3914,7 +3904,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "Conditional",
-                      "src": "1184:25:1",
+                      "src": "1206:25:1",
                       "trueExpression": {
                         "argumentTypes": null,
                         "id": 177,
@@ -3922,7 +3912,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 142,
-                        "src": "1199:6:1",
+                        "src": "1221:6:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -3933,7 +3923,7 @@
                         "typeString": "int256"
                       }
                     },
-                    "src": "1152:57:1",
+                    "src": "1174:57:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -3941,7 +3931,7 @@
                   },
                   "id": 181,
                   "nodeType": "ExpressionStatement",
-                  "src": "1152:57:1"
+                  "src": "1174:57:1"
                 },
                 {
                   "expression": {
@@ -3962,10 +3952,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 105,
-                          "src": "1219:7:1",
+                          "src": "1241:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                            "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                            "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                            "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                           }
                         },
                         "id": 184,
@@ -3976,10 +3966,10 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 136,
-                          "src": "1227:7:1",
+                          "src": "1249:7:1",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
                           }
                         },
                         "isConstant": false,
@@ -3987,7 +3977,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "1219:16:1",
+                        "src": "1241:16:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_struct$_Client_$101_storage",
                           "typeString": "struct EnergyConsumption.Client storage ref"
@@ -4001,7 +3991,7 @@
                       "memberName": "energyToBePaid",
                       "nodeType": "MemberAccess",
                       "referencedDeclaration": 100,
-                      "src": "1219:31:1",
+                      "src": "1241:31:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
@@ -4032,7 +4022,7 @@
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
                               "referencedDeclaration": 156,
-                              "src": "1254:8:1",
+                              "src": "1276:8:1",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_int256",
                                 "typeString": "int256"
@@ -4050,7 +4040,7 @@
                               "kind": "number",
                               "lValueRequested": false,
                               "nodeType": "Literal",
-                              "src": "1265:1:1",
+                              "src": "1287:1:1",
                               "subdenomination": null,
                               "typeDescriptions": {
                                 "typeIdentifier": "t_rational_0_by_1",
@@ -4058,7 +4048,7 @@
                               },
                               "value": "0"
                             },
-                            "src": "1254:12:1",
+                            "src": "1276:12:1",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bool",
                               "typeString": "bool"
@@ -4072,7 +4062,7 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "TupleExpression",
-                        "src": "1253:14:1",
+                        "src": "1275:14:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bool",
                           "typeString": "bool"
@@ -4088,7 +4078,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "1281:1:1",
+                        "src": "1303:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -4102,7 +4092,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "Conditional",
-                      "src": "1253:29:1",
+                      "src": "1275:29:1",
                       "trueExpression": {
                         "argumentTypes": null,
                         "id": 190,
@@ -4110,7 +4100,7 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 156,
-                        "src": "1270:8:1",
+                        "src": "1292:8:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_int256",
                           "typeString": "int256"
@@ -4121,7 +4111,7 @@
                         "typeString": "int256"
                       }
                     },
-                    "src": "1219:63:1",
+                    "src": "1241:63:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4129,7 +4119,7 @@
                   },
                   "id": 194,
                   "nodeType": "ExpressionStatement",
-                  "src": "1219:63:1"
+                  "src": "1241:63:1"
                 }
               ]
             },
@@ -4150,22 +4140,21 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 196,
-                  "src": "885:15:1",
+                  "src": "901:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 135,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "885:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "901:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
@@ -4177,7 +4166,7 @@
                   "name": "_contract",
                   "nodeType": "VariableDeclaration",
                   "scope": 196,
-                  "src": "902:17:1",
+                  "src": "924:17:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4188,7 +4177,7 @@
                     "id": 137,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "902:7:1",
+                    "src": "924:7:1",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -4199,16 +4188,16 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "884:36:1"
+              "src": "900:42:1"
             },
             "returnParameters": {
               "id": 140,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "927:0:1"
+              "src": "949:0:1"
             },
             "scope": 236,
-            "src": "858:431:1",
+            "src": "874:437:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
@@ -4217,7 +4206,7 @@
             "body": {
               "id": 208,
               "nodeType": "Block",
-              "src": "1384:55:1",
+              "src": "1412:55:1",
               "statements": [
                 {
                   "expression": {
@@ -4231,10 +4220,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1401:7:1",
+                        "src": "1429:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 205,
@@ -4245,10 +4234,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 198,
-                        "src": "1409:7:1",
+                        "src": "1437:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -4256,7 +4245,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1401:16:1",
+                      "src": "1429:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -4270,7 +4259,7 @@
                     "memberName": "energyConsumed",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 96,
-                    "src": "1401:31:1",
+                    "src": "1429:31:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4279,7 +4268,7 @@
                   "functionReturnParameters": 202,
                   "id": 207,
                   "nodeType": "Return",
-                  "src": "1394:38:1"
+                  "src": "1422:38:1"
                 }
               ]
             },
@@ -4300,29 +4289,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 209,
-                  "src": "1326:15:1",
+                  "src": "1348:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 197,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1326:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1348:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1325:17:1"
+              "src": "1347:23:1"
             },
             "returnParameters": {
               "id": 202,
@@ -4334,7 +4322,7 @@
                   "name": "_energyConsumed",
                   "nodeType": "VariableDeclaration",
                   "scope": 209,
-                  "src": "1364:19:1",
+                  "src": "1392:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4345,7 +4333,7 @@
                     "id": 200,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1364:3:1",
+                    "src": "1392:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4355,10 +4343,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1363:21:1"
+              "src": "1391:21:1"
             },
             "scope": 236,
-            "src": "1299:140:1",
+            "src": "1321:146:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -4367,7 +4355,7 @@
             "body": {
               "id": 221,
               "nodeType": "Block",
-              "src": "1530:53:1",
+              "src": "1564:53:1",
               "statements": [
                 {
                   "expression": {
@@ -4381,10 +4369,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1547:7:1",
+                        "src": "1581:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 218,
@@ -4395,10 +4383,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 211,
-                        "src": "1555:7:1",
+                        "src": "1589:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -4406,7 +4394,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1547:16:1",
+                      "src": "1581:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -4420,7 +4408,7 @@
                     "memberName": "energyCredit",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 98,
-                    "src": "1547:29:1",
+                    "src": "1581:29:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4429,7 +4417,7 @@
                   "functionReturnParameters": 215,
                   "id": 220,
                   "nodeType": "Return",
-                  "src": "1540:36:1"
+                  "src": "1574:36:1"
                 }
               ]
             },
@@ -4450,29 +4438,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 222,
-                  "src": "1474:15:1",
+                  "src": "1502:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 210,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1474:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1502:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1473:17:1"
+              "src": "1501:23:1"
             },
             "returnParameters": {
               "id": 215,
@@ -4484,7 +4471,7 @@
                   "name": "_energyCredit",
                   "nodeType": "VariableDeclaration",
                   "scope": 222,
-                  "src": "1512:17:1",
+                  "src": "1546:17:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4495,7 +4482,7 @@
                     "id": 213,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1512:3:1",
+                    "src": "1546:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4505,10 +4492,10 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1511:19:1"
+              "src": "1545:19:1"
             },
             "scope": 236,
-            "src": "1449:134:1",
+            "src": "1477:140:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
@@ -4517,7 +4504,7 @@
             "body": {
               "id": 234,
               "nodeType": "Block",
-              "src": "1678:55:1",
+              "src": "1718:55:1",
               "statements": [
                 {
                   "expression": {
@@ -4531,10 +4518,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 105,
-                        "src": "1695:7:1",
+                        "src": "1735:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Client_$101_storage_$",
-                          "typeString": "mapping(address => struct EnergyConsumption.Client storage ref)"
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_Client_$101_storage_$",
+                          "typeString": "mapping(string memory => struct EnergyConsumption.Client storage ref)"
                         }
                       },
                       "id": 231,
@@ -4545,10 +4532,10 @@
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
                         "referencedDeclaration": 224,
-                        "src": "1703:7:1",
+                        "src": "1743:7:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_address",
-                          "typeString": "address"
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
                         }
                       },
                       "isConstant": false,
@@ -4556,7 +4543,7 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "1695:16:1",
+                      "src": "1735:16:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_struct$_Client_$101_storage",
                         "typeString": "struct EnergyConsumption.Client storage ref"
@@ -4570,7 +4557,7 @@
                     "memberName": "energyToBePaid",
                     "nodeType": "MemberAccess",
                     "referencedDeclaration": 100,
-                    "src": "1695:31:1",
+                    "src": "1735:31:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4579,7 +4566,7 @@
                   "functionReturnParameters": 228,
                   "id": 233,
                   "nodeType": "Return",
-                  "src": "1688:38:1"
+                  "src": "1728:38:1"
                 }
               ]
             },
@@ -4600,29 +4587,28 @@
                   "name": "_client",
                   "nodeType": "VariableDeclaration",
                   "scope": 235,
-                  "src": "1620:15:1",
+                  "src": "1654:21:1",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_address",
-                    "typeString": "address"
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
                   },
                   "typeName": {
                     "id": 223,
-                    "name": "address",
+                    "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1620:7:1",
-                    "stateMutability": "nonpayable",
+                    "src": "1654:6:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_address",
-                      "typeString": "address"
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "1619:17:1"
+              "src": "1653:23:1"
             },
             "returnParameters": {
               "id": 228,
@@ -4634,7 +4620,7 @@
                   "name": "_energyToBePaid",
                   "nodeType": "VariableDeclaration",
                   "scope": 235,
-                  "src": "1658:19:1",
+                  "src": "1698:19:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4645,7 +4631,7 @@
                     "id": 226,
                     "name": "int",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1658:3:1",
+                    "src": "1698:3:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_int256",
                       "typeString": "int256"
@@ -4655,20 +4641,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1657:21:1"
+              "src": "1697:21:1"
             },
             "scope": 236,
-            "src": "1593:140:1",
+            "src": "1627:146:1",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
         "scope": 237,
-        "src": "429:1309:1"
+        "src": "440:1338:1"
       }
     ],
-    "src": "0:1738:1"
+    "src": "0:1778:1"
   },
   "compiler": {
     "name": "solc",
@@ -4678,12 +4664,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x813762b961eE30a927ab5Fb119Ae2E89bad114B9",
-      "transactionHash": "0x2e68d05a01eeb0d351a836b189eae67a32715956bfcdd8049f3cb96c0d01644b"
+      "address": "0x5dC5fBf7A32D68044530783f704561B594c9Bc6E",
+      "transactionHash": "0x0fab8a5792ab39bd36c09a7cca5eb27947d912499417907c8aa29281d8269898"
     }
   },
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-12T05:47:45.867Z",
+  "updatedAt": "2019-07-12T06:49:47.361Z",
   "devdoc": {
     "methods": {}
   },
