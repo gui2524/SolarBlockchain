@@ -26,22 +26,15 @@ App = {
       App.contracts.EnergyQuota = TruffleContract(energyQuota);
       // Connect provider to interact with contract
       App.contracts.EnergyQuota.setProvider(App.web3Provider);
+      return App.render();
 
     });
-
-    $.getJSON("EnergyQuota.json", function(energyQuota) {
-      // Instantiate a new truffle contract from the artifact
-      App.contracts.EnergyQuota = TruffleContract(energyQuota);
-      // Connect provider to interact with contract
-      App.contracts.EnergyQuota.setProvider(App.web3Provider);
-
-    });
-
-    return App.render();
+    
   },
 
   render: function() {
-    var electionInstance;
+    var energyQuotaInstance;
+    var energyConsumptionInstance;
     var loader = $("#loader");
     var content = $("#content");
 
@@ -49,32 +42,23 @@ App = {
     content.hide();
 
     // Load account data
-    web3.eth.getCoinbase(function(err, account) {
-      if (err === null) {
-        App.account = account;
-        $("#accountAddress").html("Your Account: " + account);
-      }
+    web3.eth.getAccounts(function(error, accounts) {
+        console.log(accounts);
+        App.account = accounts[0];
+        $("#accountAddress").html("Your Account: " + App.account);
     });
 
     // Load contract data
-    App.contracts.Election.deployed().then(function(instance) {
-      electionInstance = instance;
-      return electionInstance.candidatesCount();
-    }).then(function(candidatesCount) {
+    App.contracts.EnergyQuota.deployed().then(function(instance) {
+      energyQuotaInstance = instance;
+      energyQuotaInstance.addClient(10, App.account)
+      return energyQuotaInstance.getQuotaBought(App.account);
+    }).then(function(energyConsumed) {
       var candidatesResults = $("#candidatesResults");
-      candidatesResults.empty();
 
-      for (var i = 1; i <= candidatesCount; i++) {
-        electionInstance.candidates(i).then(function(candidate) {
-          var id = candidate[0];
-          var name = candidate[1];
-          var voteCount = candidate[2];
-
-          // Render candidate Result
-          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-          candidatesResults.append(candidateTemplate);
-        });
-      }
+      // Render candidate Result
+      var candidateTemplate = "<tr><th>" + energyConsumed + "</th></tr>"
+      candidatesResults.append(candidateTemplate);
 
       loader.hide();
       content.show();
