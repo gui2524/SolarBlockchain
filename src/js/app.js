@@ -17,16 +17,24 @@ App = {
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
       web3 = new Web3(App.web3Provider);
     }
-    return App.initContract();
+    App.initContract();
   },
 
   initContract: function() {
-    $.getJSON("EnergyQuota.json", function(energyQuota) {
+    $.getJSON("EnergyConsumption.json", function(energyConsumption) {
       // Instantiate a new truffle contract from the artifact
-      App.contracts.EnergyQuota = TruffleContract(energyQuota);
+      App.contracts.EnergyConsumption = TruffleContract(energyConsumption);
       // Connect provider to interact with contract
-      App.contracts.EnergyQuota.setProvider(App.web3Provider);
-      return App.render();
+      App.contracts.EnergyConsumption.setProvider(App.web3Provider);
+          $.getJSON("EnergyQuota.json", function(energyQuota) {
+      // Instantiate a new truffle contract from the artifact
+          App.contracts.EnergyQuota = TruffleContract(energyQuota);
+      // Connect provider to interact with contract
+          App.contracts.EnergyQuota.setProvider(App.web3Provider);
+
+          App.render(10);
+
+      });
 
     });
     
@@ -37,10 +45,15 @@ App = {
     var energyConsumptionInstance;
     var loader = $("#loader");
     var content = $("#content");
+    var ID;
+    var energyConsumed;
+    var quota;
+    var totalToBePaid;
+    var energyCredit;
 
     loader.show();
     content.hide();
-
+ 
     // Load account data
     web3.eth.getAccounts(function(error, accounts) {
         console.log(accounts);
@@ -48,23 +61,60 @@ App = {
         $("#accountAddress").html("Your Account: " + App.account);
     });
 
-    // Load contract data
-    App.contracts.EnergyQuota.deployed().then(function(instance) {
+    App.contracts.EnergyConsumption.deployed().then(function(instance) {
+      energyConsumptionInstance = instance;
+      ID = window.prompt("Enter your LIGHT account ID: ");
+      amount = window.prompt("Enter your amount of energy quota bought: ");
+      if(ID == "Guilherme"){
+        energyConsumptionInstance.addClient(100, App.account)
+      }else if(ID == "Tamires"){
+        energyConsumptionInstance.addClient(50, App.account)
+      }else{
+        energyConsumptionInstance.addClient(20, App.account)
+      }
+      
+      return energyConsumptionInstance.getEnergyConsumed(App.account);
+    }).then(function(_energyConsumed) {
+      energyConsumed = _energyConsumed;
+
+      App.contracts.EnergyQuota.deployed().then(function(instance) {
       energyQuotaInstance = instance;
-      energyQuotaInstance.addClient(10, App.account)
+      
+      energyQuotaInstance.addClient(parseInt(amount), App.account);
+      
       return energyQuotaInstance.getQuotaBought(App.account);
-    }).then(function(energyConsumed) {
-      var candidatesResults = $("#candidatesResults");
+      }).then(function(_quota) {
+        quota = _quota;
+        energyConsumptionInstance.manageConsumption(App.account, energyQuotaInstance.address);
+        return energyConsumptionInstance.getEnergyCredit(App.account);
+          }).then(function(_energyCredit) {
+            energyCredit =  _energyCredit
+            return energyConsumptionInstance.getEnergyToBePaid(App.account);
+          }).then(function(_energyToBePaid) {
+              totalToBePaid = _energyToBePaid
 
-      // Render candidate Result
-      var candidateTemplate = "<tr><th>" + energyConsumed + "</th></tr>"
-      candidatesResults.append(candidateTemplate);
+              console.log(energyCredit);
+              var candidatesResults = $("#candidatesResults");
+              candidatesResults.empty();
 
-      loader.hide();
-      content.show();
+            // Render candidate Result
+              var candidateTemplate = "<tr><th>" + ID + "</th><td>" + totalToBePaid + "</td><td>" + energyCredit + "</td><td>" + energyConsumed + "</td><td>" + quota + "</td></tr>"
+              candidatesResults.append(candidateTemplate);
+
+              loader.hide();
+              content.show();
+
+      }).catch(function(error) {
+        console.warn(error);
+      });
+
     }).catch(function(error) {
       console.warn(error);
     });
+
+
+
+    
   }
 };
 
