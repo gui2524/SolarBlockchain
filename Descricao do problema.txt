@@ -1,0 +1,5 @@
+- Descricao do problema / solução:
+O problema atacado pela solucao desenvolvida é a da centralização da informação, do poder e da responsabilidade de processamento da conta de energia junto com a cota de energia pela Light.
+A ideia é utilizar o blockchain para armazenar a informação de cota de energia, credito de enegia, energia consumida e total de energia a ser paga pelo cliente, tornando essa informação imutavel e confiavel para o cliente, alem de tirar responsabilidade de processamento de dados da Light.
+
+- Desenvolvedores: Guilherme Araujo e Tamires Buchbinder
